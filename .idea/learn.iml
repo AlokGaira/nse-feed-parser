@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="CPP_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/tests/Bounded_Queue_Test.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tests/CMakeLists.txt" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tests/Map_Serializer.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/shared_memory_writer.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/main.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/UDPMulticastReciever/UDPMulticastReciever.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/UDPMulticastReciever/CMakeLists.txt" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/UDPClient/UDPClient.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/UDPClient/UDPClient.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/UDPServer/UDPServer.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/UDPServer/UDPServer.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/shared_memory_reader.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/include/drivers/Redis.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/include/udp_multicast_reciever/UDPMulticastReciever.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/include/ds/Market_Depth.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/include/ds/Bounded_Queue.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/include/ds/Market_Depth_Map.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/include/ds/Order_Map.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/include/schema/Order_Message.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/include/schema/Stream_Header.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/include/schema/Contract_Data.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/include/schema/Min_Heap_Comparator.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/include/schema/Max_Heap_Comparator.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/include/schema/Depth.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/include/schema/Trade_Message.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/client.cpp" isTestSource="false" />
+    </content>
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library">
+      <library name="Header Search Paths">
+        <CLASSES>
+          <root url="file:///usr/include" />
+          <root url="file:///usr/lib/gcc/x86_64-linux-gnu/5/include-fixed" />
+          <root url="file:///usr/lib/gcc/x86_64-linux-gnu/5/include" />
+          <root url="file:///usr/local/include" />
+          <root url="file://$MODULE_DIR$/../boost_1_68_0" />
+        </CLASSES>
+        <SOURCES>
+          <root url="file:///usr/include" />
+          <root url="file:///usr/lib/gcc/x86_64-linux-gnu/5/include-fixed" />
+          <root url="file:///usr/lib/gcc/x86_64-linux-gnu/5/include" />
+          <root url="file:///usr/local/include" />
+          <root url="file://$MODULE_DIR$/../boost_1_68_0" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+  </component>
+</module>

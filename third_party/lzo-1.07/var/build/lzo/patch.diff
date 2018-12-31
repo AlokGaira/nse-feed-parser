@@ -1,0 +1,912 @@
+diff -urbBN lzo-1.07/include/lzoconf.h lzo/include/lzoconf.h
+--- lzo-1.07/include/lzoconf.h	Wed Oct 18 02:25:10 2000
++++ lzo/include/lzoconf.h	Mon Oct 29 20:11:36 2001
+@@ -360,8 +360,8 @@
+ typedef lzo_bytep (__LZO_ENTRY *lzo_alloc_hook_t) (lzo_uint, lzo_uint);
+ typedef void (__LZO_ENTRY *lzo_free_hook_t) (lzo_voidp);
+ 
+-extern lzo_alloc_hook_t lzo_alloc_hook;
+-extern lzo_free_hook_t lzo_free_hook;
++LZO_EXTERN(lzo_alloc_hook_t) lzo_alloc_hook;
++LZO_EXTERN(lzo_free_hook_t) lzo_free_hook;
+ 
+ /* misc. */
+ LZO_EXTERN(lzo_bool) lzo_assert(int _expr);
+diff -urbBN lzo-1.07/lzo.dsw lzo/lzo.dsw
+--- lzo-1.07/lzo.dsw	Thu Jan  1 01:00:00 1970
++++ lzo/lzo.dsw	Mon Oct 29 20:38:04 2001
+@@ -0,0 +1,29 @@
++Microsoft Developer Studio Workspace File, Format Version 5.00
++# WARNUNG: DIESE ARBEITSBEREICHSDATEI DARF NICHT BEARBEITET ODER GELÖSCHT WERDEN!
++
++###############################################################################
++
++Project: "liblzo"=".\src\liblzo.dsp" - Package Owner=<4>
++
++Package=<5>
++{{{
++}}}
++
++Package=<4>
++{{{
++}}}
++
++###############################################################################
++
++Global:
++
++Package=<5>
++{{{
++}}}
++
++Package=<3>
++{{{
++}}}
++
++###############################################################################
++
+diff -urbBN lzo-1.07/src/Makefile.lib lzo/src/Makefile.lib
+--- lzo-1.07/src/Makefile.lib	Thu Jan  1 01:00:00 1970
++++ lzo/src/Makefile.lib	Mon Oct 29 20:34:56 2001
+@@ -0,0 +1,61 @@
++prefix = /mingw
++INCLUDES = -I. -I../include -I..
++CFLAGS = -O3 -fnative-struct $(INCLUDES)
++LDFLAGS = 
++CC = gcc
++AS = $(CC) -x assembler-with-cpp
++INSTALL = install -c
++MKDIR = mkdir -p
++DEFS = -DHAVE_CONFIG_H -DLZO_HAVE_CONFIG_H
++PACKAGE = lzo
++SOURCES = lzo1.c lzo1_99.c lzo1a.c lzo1a_99.c lzo1b_1.c lzo1b_2.c \
++ lzo1b_3.c lzo1b_4.c lzo1b_5.c lzo1b_6.c lzo1b_7.c lzo1b_8.c \
++ lzo1b_9.c lzo1b_99.c lzo1b_9x.c lzo1b_cc.c lzo1b_d1.c lzo1b_d2.c \
++ lzo1b_rr.c lzo1b_xx.c lzo1c_1.c lzo1c_2.c lzo1c_3.c lzo1c_4.c \
++ lzo1c_5.c lzo1c_6.c lzo1c_7.c lzo1c_8.c lzo1c_9.c lzo1c_99.c \
++ lzo1c_9x.c lzo1c_cc.c lzo1c_d1.c lzo1c_d2.c lzo1c_rr.c lzo1c_xx.c \
++ lzo1f_1.c lzo1f_9x.c lzo1f_d1.c lzo1f_d2.c lzo1x_1.c lzo1x_9x.c \
++ lzo1x_d1.c lzo1x_d2.c lzo1x_d3.c lzo1x_o.c lzo1x_1k.c lzo1x_1l.c \
++ lzo1x_1o.c lzo1y_1.c lzo1y_9x.c lzo1y_d1.c lzo1y_d2.c lzo1y_d3.c \
++ lzo1y_o.c lzo1z_9x.c lzo1z_d1.c lzo1z_d2.c lzo1z_d3.c lzo2a_9x.c \
++ lzo2a_d1.c lzo2a_d2.c alloc.c io.c lzo_crc.c lzo_dll.c lzo_init.c \
++ lzo_ptr.c lzo_str.c lzo_util.c 
++
++SOURCES_S = lzo1c_s1.s lzo1c_s2.s lzo1f_f1.s lzo1f_f2.s lzo1x_f1.s \
++ lzo1x_f2.s lzo1x_s1.s lzo1x_s2.s lzo1y_f1.s lzo1y_f2.s lzo1y_s1.s \
++ lzo1y_s2.s
++
++shared_OBJECTS = $(SOURCES:.c=.lo) $(SOURCES_S:.s=.o)
++
++TARGETS = lib$(PACKAGE).a lib$(PACKAGE).dll
++
++HEADERS = ../include/lzo1.h ../include/lzo1a.h ../include/lzo1c.h \
++ ../include/lzo1x.h ../include/lzo1z.h ../include/lzoconf.h \
++ ../include/lzo16bit.h ../include/lzo1b.h ../include/lzo1f.h \
++ ../include/lzo1y.h ../include/lzo2a.h ../include/lzoutil.h
++
++all: $(TARGETS)
++
++install: all
++	$(MKDIR) $(prefix)/lib/ $(prefix)/include/
++	$(MKDIR) $(prefix)/bin/
++	$(INSTALL) $(HEADERS) $(prefix)/include/
++	$(INSTALL) -c lib$(PACKAGE).dll $(prefix)/bin/
++	$(INSTALL) -c lib$(PACKAGE).a $(prefix)/lib/
++
++clean:
++	rm -f *~ $(TARGETS) $(shared_OBJECTS)
++
++lib$(PACKAGE).a: lib$(PACKAGE).dll
++
++lib$(PACKAGE).dll: $(shared_OBJECTS)
++	$(CC) $(CFLAGS) -shared -o $@ -Wl,--out-implib=lib$(PACKAGE).a $(shared_OBJECTS) $(LDFLAGS)
++
++%.lo: %.c
++	$(CC) $(CFLAGS) $(DEFS) -D__LZO_EXPORT1="__declspec (dllexport)" -c $< -o $@
++
++%.o: i386/src/%.s
++	$(AS) $(CFLAGS) $(DEFS) -D__LZO_EXPORT1="__declspec (dllexport)" -c $< -o $@
++
++.SUFFIXES: .c .dll .s .a .in .lo
++.PHONY: all clean install
+diff -urbBN lzo-1.07/src/liblzo.dsp lzo/src/liblzo.dsp
+--- lzo-1.07/src/liblzo.dsp	Thu Jan  1 01:00:00 1970
++++ lzo/src/liblzo.dsp	Mon Oct 29 21:26:10 2001
+@@ -0,0 +1,796 @@
++# Microsoft Developer Studio Project File - Name="liblzo" - Package Owner=<4>
++# Microsoft Developer Studio Generated Build File, Format Version 5.00
++# ** NICHT BEARBEITEN **
++
++# TARGTYPE "Win32 (x86) Dynamic-Link Library" 0x0102
++
++CFG=liblzo - Win32 Debug
++!MESSAGE Dies ist kein gültiges Makefile. Zum Erstellen dieses Projekts mit\
++ NMAKE
++!MESSAGE verwenden Sie den Befehl "Makefile exportieren" und führen Sie den\
++ Befehl
++!MESSAGE 
++!MESSAGE NMAKE /f "liblzo.mak".
++!MESSAGE 
++!MESSAGE Sie können beim Ausführen von NMAKE eine Konfiguration angeben
++!MESSAGE durch Definieren des Makros CFG in der Befehlszeile. Zum Beispiel:
++!MESSAGE 
++!MESSAGE NMAKE /f "liblzo.mak" CFG="liblzo - Win32 Debug"
++!MESSAGE 
++!MESSAGE Für die Konfiguration stehen zur Auswahl:
++!MESSAGE 
++!MESSAGE "liblzo - Win32 Release" (basierend auf\
++  "Win32 (x86) Dynamic-Link Library")
++!MESSAGE "liblzo - Win32 Debug" (basierend auf\
++  "Win32 (x86) Dynamic-Link Library")
++!MESSAGE 
++
++# Begin Project
++# PROP Scc_ProjName ""
++# PROP Scc_LocalPath ""
++CPP=cl.exe
++MTL=midl.exe
++RSC=rc.exe
++
++!IF  "$(CFG)" == "liblzo - Win32 Release"
++
++# PROP BASE Use_MFC 0
++# PROP BASE Use_Debug_Libraries 0
++# PROP BASE Output_Dir "Release"
++# PROP BASE Intermediate_Dir "Release"
++# PROP BASE Target_Dir ""
++# PROP Use_MFC 0
++# PROP Use_Debug_Libraries 0
++# PROP Output_Dir "Opt"
++# PROP Intermediate_Dir "Opt"
++# PROP Ignore_Export_Lib 0
++# PROP Target_Dir ""
++# ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
++# ADD CPP /nologo /MD /W3 /GX /O2 /Ob2 /I "." /I ".." /I "../include" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D __LZO_EXPORT1="__declspec (dllexport)" /D "HAVE_CONFIG_H" /D "LZO_HAVE_CONFIG_H" /FD /c
++# SUBTRACT CPP /YX
++# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o NUL /win32
++# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o NUL /win32
++# ADD BASE RSC /l 0x407 /d "NDEBUG"
++# ADD RSC /l 0x409 /d "NDEBUG"
++BSC32=bscmake.exe
++# ADD BASE BSC32 /nologo
++# ADD BSC32 /nologo
++LINK32=link.exe
++# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /machine:I386
++# ADD LINK32 kernel32.lib /nologo /version:1.7 /subsystem:windows /dll /pdb:none /machine:I386
++
++!ELSEIF  "$(CFG)" == "liblzo - Win32 Debug"
++
++# PROP BASE Use_MFC 0
++# PROP BASE Use_Debug_Libraries 1
++# PROP BASE Output_Dir "Debug"
++# PROP BASE Intermediate_Dir "Debug"
++# PROP BASE Target_Dir ""
++# PROP Use_MFC 0
++# PROP Use_Debug_Libraries 1
++# PROP Output_Dir "Dbg"
++# PROP Intermediate_Dir "Dbg"
++# PROP Ignore_Export_Lib 0
++# PROP Target_Dir ""
++# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
++# ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "." /I ".." /I "../include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D __LZO_EXPORT1="__declspec (dllexport)" /D "HAVE_CONFIG_H" /D "LZO_HAVE_CONFIG_H" /FD /c
++# SUBTRACT CPP /YX
++# ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o NUL /win32
++# ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o NUL /win32
++# ADD BASE RSC /l 0x407 /d "_DEBUG"
++# ADD RSC /l 0x409 /d "_DEBUG"
++BSC32=bscmake.exe
++# ADD BASE BSC32 /nologo
++# ADD BSC32 /nologo
++LINK32=link.exe
++# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /debug /machine:I386 /pdbtype:sept
++# ADD LINK32 kernel32.lib /nologo /version:1.7 /subsystem:windows /dll /pdb:none /debug /machine:I386
++
++!ENDIF 
++
++# Begin Target
++
++# Name "liblzo - Win32 Release"
++# Name "liblzo - Win32 Debug"
++# Begin Source File
++
++SOURCE=.\alloc.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\io.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1_99.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1a.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1a_99.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1b_1.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1b_2.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1b_3.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1b_4.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1b_5.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1b_6.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1b_7.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1b_8.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1b_9.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1b_99.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1b_9x.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1b_cc.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1b_d1.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1b_d2.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1b_rr.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1b_xx.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1c_1.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1c_2.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1c_3.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1c_4.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1c_5.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1c_6.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1c_7.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1c_8.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1c_9.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1c_99.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1c_9x.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1c_cc.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1c_d1.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1c_d2.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1c_rr.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\i386\d_asm1\lzo1c_s1.asm
++
++!IF  "$(CFG)" == "liblzo - Win32 Release"
++
++# Begin Custom Build
++InputDir=".\i386\d_asm1"
++IntDir=.\Opt
++InputPath=.\i386\d_asm1\lzo1c_s1.asm
++InputName=lzo1c_s1
++
++"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
++	ml -nologo -coff -Gd -Zm -Cp -Cx -Fo$(IntDir)\$(InputName).obj -c\
++ $(InputDir)\$(InputName).asm
++
++# End Custom Build
++
++!ELSEIF  "$(CFG)" == "liblzo - Win32 Debug"
++
++# Begin Custom Build
++InputDir=".\i386\d_asm1"
++IntDir=.\Dbg
++InputPath=.\i386\d_asm1\lzo1c_s1.asm
++InputName=lzo1c_s1
++
++"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
++	ml -nologo -coff -Gd -Zm -Cp -Cx -Fo$(IntDir)\$(InputName).obj -c\
++ $(InputDir)\$(InputName).asm
++
++# End Custom Build
++
++!ENDIF 
++
++# End Source File
++# Begin Source File
++
++SOURCE=.\i386\d_asm1\lzo1c_s2.asm
++
++!IF  "$(CFG)" == "liblzo - Win32 Release"
++
++# Begin Custom Build
++InputDir=".\i386\d_asm1"
++IntDir=.\Opt
++InputPath=.\i386\d_asm1\lzo1c_s2.asm
++InputName=lzo1c_s2
++
++"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
++	ml -nologo -coff -Gd -Zm -Cp -Cx -Fo$(IntDir)\$(InputName).obj -c\
++ $(InputDir)\$(InputName).asm
++
++# End Custom Build
++
++!ELSEIF  "$(CFG)" == "liblzo - Win32 Debug"
++
++# Begin Custom Build
++InputDir=".\i386\d_asm1"
++IntDir=.\Dbg
++InputPath=.\i386\d_asm1\lzo1c_s2.asm
++InputName=lzo1c_s2
++
++"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
++	ml -nologo -coff -Gd -Zm -Cp -Cx -Fo$(IntDir)\$(InputName).obj -c\
++ $(InputDir)\$(InputName).asm
++
++# End Custom Build
++
++!ENDIF 
++
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1c_xx.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1f_1.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1f_9x.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1f_d1.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1f_d2.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\i386\d_asm1\lzo1f_f1.asm
++
++!IF  "$(CFG)" == "liblzo - Win32 Release"
++
++# Begin Custom Build
++InputDir=".\i386\d_asm1"
++IntDir=.\Opt
++InputPath=.\i386\d_asm1\lzo1f_f1.asm
++InputName=lzo1f_f1
++
++"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
++	ml -nologo -coff -Gd -Zm -Cp -Cx -Fo$(IntDir)\$(InputName).obj -c\
++ $(InputDir)\$(InputName).asm
++
++# End Custom Build
++
++!ELSEIF  "$(CFG)" == "liblzo - Win32 Debug"
++
++# Begin Custom Build
++InputDir=".\i386\d_asm1"
++IntDir=.\Dbg
++InputPath=.\i386\d_asm1\lzo1f_f1.asm
++InputName=lzo1f_f1
++
++"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
++	ml -nologo -coff -Gd -Zm -Cp -Cx -Fo$(IntDir)\$(InputName).obj -c\
++ $(InputDir)\$(InputName).asm
++
++# End Custom Build
++
++!ENDIF 
++
++# End Source File
++# Begin Source File
++
++SOURCE=.\i386\d_asm1\lzo1f_f2.asm
++
++!IF  "$(CFG)" == "liblzo - Win32 Release"
++
++# Begin Custom Build
++InputDir=".\i386\d_asm1"
++IntDir=.\Opt
++InputPath=.\i386\d_asm1\lzo1f_f2.asm
++InputName=lzo1f_f2
++
++"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
++	ml -nologo -coff -Gd -Zm -Cp -Cx -Fo$(IntDir)\$(InputName).obj -c\
++ $(InputDir)\$(InputName).asm
++
++# End Custom Build
++
++!ELSEIF  "$(CFG)" == "liblzo - Win32 Debug"
++
++# Begin Custom Build
++InputDir=".\i386\d_asm1"
++IntDir=.\Dbg
++InputPath=.\i386\d_asm1\lzo1f_f2.asm
++InputName=lzo1f_f2
++
++"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
++	ml -nologo -coff -Gd -Zm -Cp -Cx -Fo$(IntDir)\$(InputName).obj -c\
++ $(InputDir)\$(InputName).asm
++
++# End Custom Build
++
++!ENDIF 
++
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1x_1.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1x_1k.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1x_1l.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1x_1o.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1x_9x.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1x_d1.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1x_d2.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1x_d3.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\i386\d_asm1\lzo1x_f1.asm
++
++!IF  "$(CFG)" == "liblzo - Win32 Release"
++
++# Begin Custom Build
++InputDir=".\i386\d_asm1"
++IntDir=.\Opt
++InputPath=.\i386\d_asm1\lzo1x_f1.asm
++InputName=lzo1x_f1
++
++"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
++	ml -nologo -coff -Gd -Zm -Cp -Cx -Fo$(IntDir)\$(InputName).obj -c\
++ $(InputDir)\$(InputName).asm
++
++# End Custom Build
++
++!ELSEIF  "$(CFG)" == "liblzo - Win32 Debug"
++
++# Begin Custom Build
++InputDir=".\i386\d_asm1"
++IntDir=.\Dbg
++InputPath=.\i386\d_asm1\lzo1x_f1.asm
++InputName=lzo1x_f1
++
++"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
++	ml -nologo -coff -Gd -Zm -Cp -Cx -Fo$(IntDir)\$(InputName).obj -c\
++ $(InputDir)\$(InputName).asm
++
++# End Custom Build
++
++!ENDIF 
++
++# End Source File
++# Begin Source File
++
++SOURCE=.\i386\d_asm1\lzo1x_f2.asm
++
++!IF  "$(CFG)" == "liblzo - Win32 Release"
++
++# Begin Custom Build
++InputDir=".\i386\d_asm1"
++IntDir=.\Opt
++InputPath=.\i386\d_asm1\lzo1x_f2.asm
++InputName=lzo1x_f2
++
++"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
++	ml -nologo -coff -Gd -Zm -Cp -Cx -Fo$(IntDir)\$(InputName).obj -c\
++ $(InputDir)\$(InputName).asm
++
++# End Custom Build
++
++!ELSEIF  "$(CFG)" == "liblzo - Win32 Debug"
++
++# Begin Custom Build
++InputDir=".\i386\d_asm1"
++IntDir=.\Dbg
++InputPath=.\i386\d_asm1\lzo1x_f2.asm
++InputName=lzo1x_f2
++
++"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
++	ml -nologo -coff -Gd -Zm -Cp -Cx -Fo$(IntDir)\$(InputName).obj -c\
++ $(InputDir)\$(InputName).asm
++
++# End Custom Build
++
++!ENDIF 
++
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1x_o.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\i386\d_asm1\lzo1x_s1.asm
++
++!IF  "$(CFG)" == "liblzo - Win32 Release"
++
++# Begin Custom Build
++InputDir=".\i386\d_asm1"
++IntDir=.\Opt
++InputPath=.\i386\d_asm1\lzo1x_s1.asm
++InputName=lzo1x_s1
++
++"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
++	ml -nologo -coff -Gd -Zm -Cp -Cx -Fo$(IntDir)\$(InputName).obj -c\
++ $(InputDir)\$(InputName).asm
++
++# End Custom Build
++
++!ELSEIF  "$(CFG)" == "liblzo - Win32 Debug"
++
++# Begin Custom Build
++InputDir=".\i386\d_asm1"
++IntDir=.\Dbg
++InputPath=.\i386\d_asm1\lzo1x_s1.asm
++InputName=lzo1x_s1
++
++"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
++	ml -nologo -coff -Gd -Zm -Cp -Cx -Fo$(IntDir)\$(InputName).obj -c\
++ $(InputDir)\$(InputName).asm
++
++# End Custom Build
++
++!ENDIF 
++
++# End Source File
++# Begin Source File
++
++SOURCE=.\i386\d_asm1\lzo1x_s2.asm
++
++!IF  "$(CFG)" == "liblzo - Win32 Release"
++
++# Begin Custom Build
++InputDir=".\i386\d_asm1"
++IntDir=.\Opt
++InputPath=.\i386\d_asm1\lzo1x_s2.asm
++InputName=lzo1x_s2
++
++"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
++	ml -nologo -coff -Gd -Zm -Cp -Cx -Fo$(IntDir)\$(InputName).obj -c\
++ $(InputDir)\$(InputName).asm
++
++# End Custom Build
++
++!ELSEIF  "$(CFG)" == "liblzo - Win32 Debug"
++
++# Begin Custom Build
++InputDir=".\i386\d_asm1"
++IntDir=.\Dbg
++InputPath=.\i386\d_asm1\lzo1x_s2.asm
++InputName=lzo1x_s2
++
++"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
++	ml -nologo -coff -Gd -Zm -Cp -Cx -Fo$(IntDir)\$(InputName).obj -c\
++ $(InputDir)\$(InputName).asm
++
++# End Custom Build
++
++!ENDIF 
++
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1y_1.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1y_9x.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1y_d1.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1y_d2.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1y_d3.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\i386\d_asm1\lzo1y_f1.asm
++
++!IF  "$(CFG)" == "liblzo - Win32 Release"
++
++# Begin Custom Build
++InputDir=".\i386\d_asm1"
++IntDir=.\Opt
++InputPath=.\i386\d_asm1\lzo1y_f1.asm
++InputName=lzo1y_f1
++
++"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
++	ml -nologo -coff -Gd -Zm -Cp -Cx -Fo$(IntDir)\$(InputName).obj -c\
++ $(InputDir)\$(InputName).asm
++
++# End Custom Build
++
++!ELSEIF  "$(CFG)" == "liblzo - Win32 Debug"
++
++# Begin Custom Build
++InputDir=".\i386\d_asm1"
++IntDir=.\Dbg
++InputPath=.\i386\d_asm1\lzo1y_f1.asm
++InputName=lzo1y_f1
++
++"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
++	ml -nologo -coff -Gd -Zm -Cp -Cx -Fo$(IntDir)\$(InputName).obj -c\
++ $(InputDir)\$(InputName).asm
++
++# End Custom Build
++
++!ENDIF 
++
++# End Source File
++# Begin Source File
++
++SOURCE=.\i386\d_asm1\lzo1y_f2.asm
++
++!IF  "$(CFG)" == "liblzo - Win32 Release"
++
++# Begin Custom Build
++InputDir=".\i386\d_asm1"
++IntDir=.\Opt
++InputPath=.\i386\d_asm1\lzo1y_f2.asm
++InputName=lzo1y_f2
++
++"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
++	ml -nologo -coff -Gd -Zm -Cp -Cx -Fo$(IntDir)\$(InputName).obj -c\
++ $(InputDir)\$(InputName).asm
++
++# End Custom Build
++
++!ELSEIF  "$(CFG)" == "liblzo - Win32 Debug"
++
++# Begin Custom Build
++InputDir=".\i386\d_asm1"
++IntDir=.\Dbg
++InputPath=.\i386\d_asm1\lzo1y_f2.asm
++InputName=lzo1y_f2
++
++"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
++	ml -nologo -coff -Gd -Zm -Cp -Cx -Fo$(IntDir)\$(InputName).obj -c\
++ $(InputDir)\$(InputName).asm
++
++# End Custom Build
++
++!ENDIF 
++
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1y_o.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\i386\d_asm1\lzo1y_s1.asm
++
++!IF  "$(CFG)" == "liblzo - Win32 Release"
++
++# Begin Custom Build
++InputDir=".\i386\d_asm1"
++IntDir=.\Opt
++InputPath=.\i386\d_asm1\lzo1y_s1.asm
++InputName=lzo1y_s1
++
++"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
++	ml -nologo -coff -Gd -Zm -Cp -Cx -Fo$(IntDir)\$(InputName).obj -c\
++ $(InputDir)\$(InputName).asm
++
++# End Custom Build
++
++!ELSEIF  "$(CFG)" == "liblzo - Win32 Debug"
++
++# Begin Custom Build
++InputDir=".\i386\d_asm1"
++IntDir=.\Dbg
++InputPath=.\i386\d_asm1\lzo1y_s1.asm
++InputName=lzo1y_s1
++
++"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
++	ml -nologo -coff -Gd -Zm -Cp -Cx -Fo$(IntDir)\$(InputName).obj -c\
++ $(InputDir)\$(InputName).asm
++
++# End Custom Build
++
++!ENDIF 
++
++# End Source File
++# Begin Source File
++
++SOURCE=.\i386\d_asm1\lzo1y_s2.asm
++
++!IF  "$(CFG)" == "liblzo - Win32 Release"
++
++# Begin Custom Build
++InputDir=".\i386\d_asm1"
++IntDir=.\Opt
++InputPath=.\i386\d_asm1\lzo1y_s2.asm
++InputName=lzo1y_s2
++
++"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
++	ml -nologo -coff -Gd -Zm -Cp -Cx -Fo$(IntDir)\$(InputName).obj -c\
++ $(InputDir)\$(InputName).asm
++
++# End Custom Build
++
++!ELSEIF  "$(CFG)" == "liblzo - Win32 Debug"
++
++# Begin Custom Build
++InputDir=".\i386\d_asm1"
++IntDir=.\Dbg
++InputPath=.\i386\d_asm1\lzo1y_s2.asm
++InputName=lzo1y_s2
++
++"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
++	ml -nologo -coff -Gd -Zm -Cp -Cx -Fo$(IntDir)\$(InputName).obj -c\
++ $(InputDir)\$(InputName).asm
++
++# End Custom Build
++
++!ENDIF 
++
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1z_9x.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1z_d1.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1z_d2.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo1z_d3.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo2a_9x.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo2a_d1.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo2a_d2.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo_crc.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo_dll.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo_init.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo_ptr.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo_str.c
++# End Source File
++# Begin Source File
++
++SOURCE=.\lzo_util.c
++# End Source File
++# End Target
++# End Project
